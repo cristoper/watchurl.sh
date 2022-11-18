@@ -1,0 +1,40 @@
+== watchurl.sh
+
+`watchurl.sh` is a simple shell script to help monitor a URL for specific content.
+It takes a URL to fetch, a regular expression to check against the contents of the fetched document, and then returns 0 if the regex matches or 1 if the regex does not match (or >1 on error fetching the URL).
+You can then take action (send email) based on the return code.
+(See the healthchecks.io integration below for an easy way to send notifications when the regex matches.)
+
+It is intended to be added to a crontab (or, for example, `/etc/cron.hourly/`) as a quick way to monitor a web page until it changes to contain some special text.
+
+URLs are fetched with `curl` and regex is checked with `grep`.
+
+== Healthchecks.io integration
+
+If the optional `--ping` flag contains a https://healthchecks.io/[healthchecks.io] uuid, then that check will be pinged when the regex matches and will be pinged at the `/fail` endpoint when the regex does not match.
+
+== Example
+
+A friend recently wanted to be notified when a refurbished AppleTV became available on Apple's refurbished store.
+I compared the source of the out-of-stock AppleTV page against some in-stock categories on the store and saw that when a category has products in stock, the page contains JSON-LD metadata for those products.
+So this command checks whether there are currently any AppleTVs in stock:
+
+```
+./watchurl.sh https://www.apple.com/shop/refurbished/appletv '"@type":"Product"'
+```
+
+Use it in a script like:
+
+```
+if ./watchurl.sh https://www.apple.com/shop/refurbished/appletv '"@type":"Product"'; then
+  echo "In stock"
+else
+  echo "Sorry."
+fi
+```
+
+This crontab entry checked every hour and successfully alerted us via email/Signal when a refurbished product became available:
+
+```
+2 * * * *   ./watchurl.sh --ping ab9744fb-...-cea21c0411ad https://www.apple.com/shop/refurbished/appletv '"@type":"Product"'
+```
