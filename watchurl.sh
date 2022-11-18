@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -o pipefail
+set -o pipefail
 
 PROGNAME=$(basename "$0")
 
