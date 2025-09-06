@@ -43,7 +43,7 @@ curlret=$?
 if [[ $curlret -ne 0 ]]; then
     echo "curl error: $curlret" 1>&2
     if [[ -n "$ping" ]]; then
-        curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/"${ping}"
+        curl -fsS -m 10 --retry 5 --max-time 45 -o /dev/null https://hc-ping.com/"${ping}"
     fi
     exit $?
 fi
@@ -53,12 +53,12 @@ fi
 if  grep -q "${regex}" <<<"${html}" ; then
     #echo "Found!" 1>&2
     if [[ -n "$ping" ]]; then
-        curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/"${ping}"
+        curl -fsS -m 10 --retry 5 --max-time 20 -o /dev/null https://hc-ping.com/"${ping}"
     fi
     exit 0
 else
     if [[ -n "$ping" ]]; then
-        curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/"${ping}"/fail
+        curl -fsS -m 10 --retry 5 --max-time 20 -o /dev/null https://hc-ping.com/"${ping}"/fail
     fi
     exit 1
 fi
